@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pac-Man Clone</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div id="score">Score: 0</div>
+    <canvas id="gameCanvas" width="1200" height="800"></canvas>
+    <div id="winScreen">
+        <h1>Você venceu!</h1>
+        <p>Parabéns por completar o jogo!</p>
+        <button onclick="restartGame()">Reiniciar</button>
+    </div>
+    <div id="gameOverScreen">
+        <h1>Game Over!</h1>
+        <p>Você foi pego pelos fantasmas!</p>
+        <button onclick="restartGame()">Reiniciar</button>
+    </div>
+    <button id="playMusic">🔊 Ativar Som</button>
+    <script src="script.js">
+    </script>
+</body>
+
+</html>

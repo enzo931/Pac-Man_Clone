@@ -1,0 +1,68 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+canvas {
+    border: 2px solid white;
+}
+
+#score {
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+
+#winScreen,
+#gameOverScreen {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    color: rgb(255, 255, 255);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+#winScreen {
+    background: linear-gradient(135deg, #4caf50, #81c784);
+}
+
+#gameOverScreen {
+    background: linear-gradient(135deg, #ff0033, #ff6666);
+}
+
+button {
+    background-color: #4caf50;
+    color: white;
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+    background-color: #81c784;
+    transform: scale(1.1);
+}
+
+button:active {
+    background-color: #388e3c;
+}
+
+#gameOverScreen h1,
+#winScreen h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
