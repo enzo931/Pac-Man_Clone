@@ -1,23 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background-color: black;
-    color: white;
-    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    background-color: #05050d;
+    background-image: 
+        radial-gradient(circle at 50% 50%, rgba(20, 20, 50, 0.5) 0%, rgba(5, 5, 13, 1) 100%),
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 100%, 100% 4px; /* Linhas sutis estilo CRT */
+    color: #ffffff;
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
 }
 
-canvas {
-    border: 2px solid white;
-}
-
+/* Moldura e Placar do Arcade */
 #score {
     font-size: 20px;
-    margin-bottom: 10px;
+    letter-spacing: 2px;
+    color: #fdff00;
+    text-shadow: 0 0 10px rgba(253, 255, 0, 0.7), 0 0 20px rgba(253, 255, 0, 0.4);
+    margin-bottom: 16px;
+    text-transform: uppercase;
 }
 
+/* Canvas com Brilho Neon Azul */
+canvas {
+    border: 4px solid #1e3cff;
+    border-radius: 12px;
+    box-shadow: 
+        0 0 15px #1e3cff,
+        0 0 30px rgba(30, 60, 255, 0.4),
+        inset 0 0 15px rgba(30, 60, 255, 0.5);
+    background-color: #000000;
+}
+
+/* Botão de Áudio Retrô */
+#playMusic {
+    margin-top: 18px;
+    background-color: #1e3cff;
+    color: #ffffff;
+    padding: 12px 24px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    border: 2px solid #ffffff;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #1e3cff;
+    transition: all 0.2s ease;
+}
+
+#playMusic:hover {
+    background-color: #0011bb;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #1e3cff;
+}
+
+/* Telas Modais (Vitória / Game Over) */
 #winScreen,
 #gameOverScreen {
     display: none;
@@ -25,44 +72,92 @@ canvas {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: white;
-    color: rgb(255, 255, 255);
-    padding: 20px;
-    border-radius: 10px;
+    padding: 30px 40px;
+    border-radius: 12px;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    width: 380px;
 }
 
 #winScreen {
-    background: linear-gradient(135deg, #4caf50, #81c784);
+    background: #081c08;
+    border: 3px solid #00ff66;
+    color: #00ff66;
+    box-shadow: 0 0 25px #00ff66, inset 0 0 15px rgba(0, 255, 102, 0.3);
 }
 
 #gameOverScreen {
-    background: linear-gradient(135deg, #ff0033, #ff6666);
+    background: #1f0508;
+    border: 3px solid #ff0044;
+    color: #ff0044;
+    box-shadow: 0 0 25px #ff0044, inset 0 0 15px rgba(255, 0, 68, 0.3);
 }
 
-button {
-    background-color: #4caf50;
-    color: white;
-    padding: 15px 30px;
-    font-size: 18px;
+#winScreen h1,
+#gameOverScreen h1 {
+    font-size: 22px;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+    animation: pulseText 1.5s infinite alternate;
+}
+
+#winScreen p,
+#gameOverScreen p {
+    font-size: 10px;
+    line-height: 1.6;
+    color: #ffffff;
+    margin-bottom: 24px;
+}
+
+/* Botões dos Modais */
+#winScreen button,
+#gameOverScreen button {
+    font-family: 'Press Start 2P', monospace;
+    padding: 12px 20px;
+    font-size: 12px;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
+    color: #ffffff;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
 }
 
-button:hover {
-    background-color: #81c784;
-    transform: scale(1.1);
+#winScreen button {
+    background-color: #00cc55;
+    box-shadow: 0 4px 0 #008833;
 }
 
-button:active {
-    background-color: #388e3c;
+#winScreen button:hover {
+    background-color: #00ff66;
+    box-shadow: 0 0 15px #00ff66;
+    transform: translateY(-2px);
 }
 
-#gameOverScreen h1,
-#winScreen h1 {
-    font-size: 36px;
-    margin-bottom: 20px;
+#gameOverScreen button {
+    background-color: #cc0033;
+    box-shadow: 0 4px 0 #880022;
+}
+
+#gameOverScreen button:hover {
+    background-color: #ff0044;
+    box-shadow: 0 0 15px #ff0044;
+    transform: translateY(-2px);
+}
+
+#winScreen button:active,
+#gameOverScreen button:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+/* Animação Pulsante para os Títulos de Fim de Jogo */
+@keyframes pulseText {
+    from {
+        opacity: 0.8;
+        text-shadow: 0 0 5px currentColor;
+    }
+    to {
+        opacity: 1;
+        text-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
+    }
 }
