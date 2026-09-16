@@ -9,69 +9,60 @@ const rows = 20;
 const cols = 30;
 let speed = 0.08;
 let score = 0;
-let fim = false; // Variável alterada de gameOver para fim
+let fim = false;
 
 // 🎵 Carrega os áudios
 const backgroundMusic = new Audio("audio/fundo.mp3");
 const collectSound = new Audio("audio/eat.mp3");
 
-// 🎶 Configura a música de fundo
-backgroundMusic.loop = true; // Faz a música tocar repetidamente
-backgroundMusic.volume = 0.5; // Ajusta o volume
+backgroundMusic.loop = true;
+backgroundMusic.volume = 0.5;
 
-// 🎵 Toca a música de fundo automaticamente ao carregar a página
 window.addEventListener("load", () => {
     backgroundMusic.play().catch(error => console.log("Autoplay bloqueado pelo navegador:", error));
 });
 
 document.getElementById("playMusic").addEventListener("click", () => {
     backgroundMusic.play();
-    document.getElementById("playMusic").style.display = "none"; // Esconde o botão após ativação
+    document.getElementById("playMusic").style.display = "none";
 });
 
-
-// 🎯 Função para tocar o som quando Pac-Man pega uma bolinha laranja
 function playCollectSound() {
-    collectSound.currentTime = 0; // Reseta o tempo para evitar delay
+    collectSound.currentTime = 0;
     collectSound.play();
 }
 
-
 let pacman = { x: 1, y: 1, radius: 15, direction: "right" };
 
+// Fantasmas com comportamentos e velocidades diferentes
 const ghosts = [
-    { x: 5, y: 5, radius: 15, direction: "right", color: "red" },
-    { x: 10, y: 15, radius: 15, direction: "left", color: "pink" },
-    { x: 15, y: 5, radius: 15, direction: "up", color: "orange" },
-    { x: 20, y: 10, radius: 15, direction: "up", color: "aqua" }
+    { x: 5, y: 5, radius: 15, direction: "right", color: "red", speed: 0.012, behavior: "chase" },       // Persegue direto
+    { x: 10, y: 15, radius: 15, direction: "left", color: "pink", speed: 0.010, behavior: "ambush" },     // Tenta prever a frente do Pac-Man
+    { x: 15, y: 5, radius: 15, direction: "up", color: "orange", speed: 0.008, behavior: "patrol" },     // Patrulha / Aleatório
+    { x: 20, y: 10, radius: 15, direction: "up", color: "aqua", speed: 0.011, behavior: "flank" }        // Flanqueia de outro ângulo
 ];
 
-
-
+// CORREÇÃO: Gerar o mapa sem colocar bolinhas (2) aleatoriamente em locais inacessíveis
 const map = Array(rows).fill(null).map((_, row) =>
     Array(cols).fill(null).map((_, col) =>
-        (row === 0 || row === rows - 1 || col === 0 || col === cols - 1 || (row === 1 && col === 1)) ? 1 : (Math.random() > 0.8 ? 1 : (Math.random() > 0.9 ? 2 : 0))
+        (row === 0 || row === rows - 1 || col === 0 || col === cols - 1 || (row === 1 && col === 1)) ? 1 : (Math.random() > 0.8 ? 1 : 0)
     )
 );
 
-// Garante que a posição inicial do Pac-Man (1, 1) seja livre
-map[1][1] = 0; // Garante que o Pac-Man não apareça em cima de um obstáculo
+map[1][1] = 0;
 
-// Função para verificar se uma célula é acessível
 function isAccessible(x, y) {
-    return map[y] && map[y][x] !== 1; // Checa se a célula não é um obstáculo
+    return map[y] && map[y][x] !== 1;
 }
 
-// Algoritmo para buscar todas as células acessíveis a partir da posição inicial
 function getAccessibleCells() {
     let accessibleCells = [];
     let visited = Array.from({ length: rows }, () => Array(cols).fill(false));
 
-    // Busca em Largura (BFS) para encontrar células acessíveis
-    let queue = [[1, 1]]; // Começando do Pac-Man
+    let queue = [[1, 1]];
     visited[1][1] = true;
 
-    const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]]; // Direções: direita, baixo, esquerda, cima
+    const directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];
 
     while (queue.length > 0) {
         let [x, y] = queue.shift();
@@ -91,34 +82,30 @@ function getAccessibleCells() {
     return accessibleCells;
 }
 
-// Função para gerar bolinhas laranjas (pontos) nas células acessíveis
 function generateOranges() {
     const accessibleCells = getAccessibleCells();
-    let orangeCount = Math.floor((rows * cols) * 0.2); // 20% das células acessíveis terão bolinhas laranjas
+    // Garante colocar bolinhas apenas em células onde o Pac-Man consegue chegar
+    let orangeCount = Math.floor(accessibleCells.length * 0.3);
 
     while (orangeCount > 0) {
         let [x, y] = accessibleCells[Math.floor(Math.random() * accessibleCells.length)];
 
-        // Verifica se já não existe uma bolinha laranja nessa posição
-        if (map[y][x] === 0) {
-            map[y][x] = 2; // Coloca a bolinha laranja
+        if (map[y][x] === 0 && !(x === 1 && y === 1)) {
+            map[y][x] = 2;
             orangeCount--;
         }
     }
 }
 
-// Gerar bolinhas laranjas nas células acessíveis
 generateOranges();
 
-
 document.addEventListener("keydown", (event) => {
-    if (fim) return;  // Impede qualquer movimento se o jogo tiver acabado
+    if (fim) return;
     const keyMap = { "w": "up", "a": "left", "s": "down", "d": "right" };
     if (keyMap[event.key]) {
         pacman.direction = keyMap[event.key];
     }
 });
-
 
 function drawMap() {
     for (let row = 0; row < rows; row++) {
@@ -145,26 +132,103 @@ function drawPacman() {
     ctx.fill();
 }
 
+// NOVO FORMATO DOS FANTASMAS (Formato Clássico com Cabeça Redonda, Ondas na Base e Olhos)
 function drawGhosts() {
     ghosts.forEach(ghost => {
+        let cx = ghost.x * gridSize + gridSize / 2;
+        let cy = ghost.y * gridSize + gridSize / 2;
+        let r = ghost.radius;
+
         ctx.fillStyle = ghost.color;
         ctx.beginPath();
-        ctx.arc(ghost.x * gridSize + gridSize / 2, ghost.y * gridSize + gridSize / 2, ghost.radius, 0, Math.PI * 2);
+
+        // Cabeça semi-circular
+        ctx.arc(cx, cy - 2, r, Math.PI, 0, false);
+
+        // Corpo
+        ctx.lineTo(cx + r, cy + r);
+
+        // Saia ondulada na base
+        let numWaves = 3;
+        let waveWidth = (r * 2) / numWaves;
+        for (let i = 0; i < numWaves; i++) {
+            ctx.quadraticCurveTo(
+                cx + r - (i + 0.5) * waveWidth, cy + r - 6,
+                cx + r - (i + 1) * waveWidth, cy + r
+            );
+        }
+
+        ctx.lineTo(cx - r, cy - 2);
+        ctx.fill();
+
+        // Olhos
+        let eyeOffsetX = 0;
+        let eyeOffsetY = 0;
+
+        if (ghost.direction === "right") eyeOffsetX = 3;
+        if (ghost.direction === "left") eyeOffsetX = -3;
+        if (ghost.direction === "up") eyeOffsetY = -3;
+        if (ghost.direction === "down") eyeOffsetY = 3;
+
+        // Fundo dos Olhos (Branco)
+        ctx.fillStyle = "white";
+        ctx.beginPath();
+        ctx.arc(cx - 5 + eyeOffsetX, cy - 4 + eyeOffsetY, 4, 0, Math.PI * 2);
+        ctx.arc(cx + 5 + eyeOffsetX, cy - 4 + eyeOffsetY, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pupilas (Azuis)
+        ctx.fillStyle = "blue";
+        ctx.beginPath();
+        ctx.arc(cx - 5 + eyeOffsetX * 1.5, cy - 4 + eyeOffsetY * 1.5, 2, 0, Math.PI * 2);
+        ctx.arc(cx + 5 + eyeOffsetX * 1.5, cy - 4 + eyeOffsetY * 1.5, 2, 0, Math.PI * 2);
         ctx.fill();
     });
 }
 
+// MOVIMENTAÇÃO DIVERSIFICADA (Mantendo atravessar paredes)
 function moveGhosts() {
     if (fim) return;
-    ghosts.forEach(ghost => {
-        let pacmanX = pacman.x;
-        let pacmanY = pacman.y;
 
-        // Calcular a direção do fantasma em direção ao Pac-Man
-        if (pacmanX > ghost.x) ghost.x += 0.01; // Move para a direita
-        if (pacmanX < ghost.x) ghost.x -= 0.01; // Move para a esquerda
-        if (pacmanY > ghost.y) ghost.y += 0.01; // Move para baixo
-        if (pacmanY < ghost.y) ghost.y -= 0.01; // Move para cima
+    ghosts.forEach(ghost => {
+        let targetX = pacman.x;
+        let targetY = pacman.y;
+
+        // Lógicas de alvo variadas para evitar sobreposição total
+        if (ghost.behavior === "ambush") {
+            // Tenta mirar à frente da posição do Pac-Man
+            if (pacman.direction === "right") targetX += 3;
+            if (pacman.direction === "left") targetX -= 3;
+            if (pacman.direction === "up") targetY -= 3;
+            if (pacman.direction === "down") targetY += 3;
+        } else if (ghost.behavior === "flank") {
+            // Flanqueia mirando no lado oposto do Pac-Man
+            targetX = pacman.x + (pacman.x - ghosts[0].x);
+            targetY = pacman.y + (pacman.y - ghosts[0].y);
+        } else if (ghost.behavior === "patrol") {
+            // Caso esteja perto demais, ele recua ligeiramente para um ponto aleatório
+            let dist = Math.hypot(pacman.x - ghost.x, pacman.y - ghost.y);
+            if (dist < 4) {
+                targetX = 1;
+                targetY = 1;
+            }
+        }
+
+        // Determina direção para movimentação e orientação dos olhos
+        let dx = targetX - ghost.x;
+        let dy = targetY - ghost.y;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            ghost.direction = dx > 0 ? "right" : "left";
+        } else {
+            ghost.direction = dy > 0 ? "down" : "up";
+        }
+
+        // Movimentação contínua atravessando paredes com a velocidade própria
+        if (ghost.x < targetX) ghost.x += ghost.speed;
+        if (ghost.x > targetX) ghost.x -= ghost.speed;
+        if (ghost.y < targetY) ghost.y += ghost.speed;
+        if (ghost.y > targetY) ghost.y -= ghost.speed;
     });
 }
 
@@ -189,13 +253,13 @@ function updatePacman() {
 
     let gridX = Math.floor(pacman.x + 0.5);
     let gridY = Math.floor(pacman.y + 0.5);
-    if (map[gridY][gridX] === 2) {
+    if (map[gridY] && map[gridY][gridX] === 2) {
         map[gridY][gridX] = 0;
         score += 10;
         scoreDisplay.textContent = "Score: " + score;
-        playCollectSound(); // 🔊 Toca o som da bolinha laranja
+        playCollectSound();
         checkWin();
-    }    
+    }
 }
 
 function checkWin() {
@@ -211,7 +275,7 @@ function checkCollision() {
         let dy = pacman.y * gridSize + gridSize / 2 - ghost.y * gridSize - gridSize / 2;
         let distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < pacman.radius + ghost.radius) {
+        if (distance < pacman.radius + ghost.radius - 5) {
             gameOver();
         }
     });
@@ -227,18 +291,16 @@ function restartGame() {
     location.reload();
 }
 
-// Função para verificar se o jogo acabou e parar o loop de animação
 function gameLoop() {
-    if (fim) return; // Impede que o jogo continue se estiver no estado de fim
+    if (fim) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawMap();
-    updatePacman();  // Atualiza o Pac-Man
-    moveGhosts();    // Move os fantasmas
-    drawPacman();    // Desenha o Pac-Man
-    drawGhosts();    // Desenha os fantasmas
-    checkCollision(); // Verifica colisões
-    requestAnimationFrame(gameLoop);  // Continua o loop de animação
+    updatePacman();
+    moveGhosts();
+    drawPacman();
+    drawGhosts();
+    checkCollision();
+    requestAnimationFrame(gameLoop);
 }
-
 
 gameLoop();
