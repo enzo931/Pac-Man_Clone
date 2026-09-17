@@ -36,8 +36,8 @@ let pacman = { x: 1, y: 1, radius: 15, direction: "right" };
 
 // Fantasmas com comportamentos e velocidades diferentes
 const ghosts = [
-    { x: 5, y: 5, radius: 15, direction: "right", color: "red", speed: 0.060, behavior: "chase" },       // Persegue direto
-    { x: 10, y: 15, radius: 15, direction: "left", color: "pink", speed: 0.040, behavior: "ambush" },     // Tenta prever a frente do Pac-Man
+    { x: 5, y: 5, radius: 15, direction: "right", color: "red", speed: 0.040, behavior: "chase" },       // Persegue direto
+    { x: 10, y: 15, radius: 15, direction: "left", color: "pink", speed: 0.030, behavior: "ambush" },     // Tenta prever a frente do Pac-Man
     { x: 15, y: 5, radius: 15, direction: "up", color: "orange", speed: 0.020, behavior: "patrol" },     // Patrulha / Aleatório
     { x: 20, y: 10, radius: 15, direction: "up", color: "aqua", speed: 0.010, behavior: "flank" }        // Flanqueia de outro ângulo
 ];
